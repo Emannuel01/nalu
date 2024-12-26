@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamentos</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .btn {
+            padding: .075rem .35rem;
+        }
+        .container-top {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+        #create-agendamento {
+            padding: 2rem;
+        }
+        #container {
+            margin-left: 300px !important;
+        }
+        .container-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container mt-5">
+        <div class="container-top">
+            <div class="mb-4">
+                <h2 class="mb-4">Agendamentos</h2> 
+                <input type="text" id="searchAgendamento" class="form-control" placeholder="Pesquisar por paciente">
+            </div>
+            <div class="mb-4">
+                <button type="button" id="create-agendamento" class="create-agendamento btn btn-success" style="padding: 0.6rem;"
+                data-toggle="modal" data-target="#novoAgendamentoModal">
+                    Novo Agendamento
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Agendamento -->
+        <div class="modal fade" id="novoAgendamentoModal" tabindex="-1" role="dialog" aria-labelledby="novoAgendamentoModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="novoAgendamentoModalLabel">Novo Agendamento</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="novoAgendamentoForm">
+                            <div class="form-group">
+                                <label for="pacienteId">Paciente</label>
+                                <select class="form-control" id="pacienteId" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="medicoId">Médico</label>
+                                <select class="form-control" id="medicoId" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="dataAgendamento">Data</label>
+                                <input type="date" class="form-control" id="dataAgendamento" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horarioAgendamento">Horário</label>
+                                <select class="form-control" id="horarioAgendamento" required>
+                                    <option value="">Selecione um horário</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" id="saveAgendamento">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grid Agendamentos -->
+        <table class="table table-bordered shadow p-3 mb-5 bg-white rounded">
+            <thead class="thead-dark container-fixed">
+                <tr class="text-center text-white bg-primary font-weight-bold">
+                    <th>id</th>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Data Agendada</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Create sidebar
+        const sidebarHtml = `
+            <div id="sidebar" class="bg-primary text-white" 
+            style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem; background: #212931 !important;">
+                <h4 class="text-center">Menu</h4>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/calendario">Calendário de Consultas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                    </li>
+                    </li class="nav-item">
+                        <a class="nav-link text-white" href="/app/horarios-agendamentos">Horários para Agendamentos</a>
+                    </li>
+                </ul>
+            </div>
+        `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+
+        // Search Agendamento
+        document.getElementById('searchAgendamento').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const paciente = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                if (paciente.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Fetch pacientes and médicos for the modal
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("/pacientes", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(pacientes => {
+                const pacienteSelect = document.getElementById('pacienteId');
+                pacientes.forEach(paciente => {
+                    const option = document.createElement('option');
+                    option.value = paciente.id;
+                    option.textContent = paciente.nome;
+                    pacienteSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar pacientes:', error));
+
+            fetch("/medicos", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(medicos => {
+                const medicoSelect = document.getElementById('medicoId');
+                medicos.forEach(medico => {
+                    const option = document.createElement('option');
+                    option.value = medico.id;
+                    option.textContent = medico.nome;
+                    medicoSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar médicos:', error));
+        });
+
+        document.getElementById('dataAgendamento').addEventListener('change', function() {
+            const medicoId = document.getElementById('medicoId').value;
+            const data = this.value;
+
+            if (medicoId && data) {
+                fetch(`/agendamentos/disponiveis?medico_id=${medicoId}&data=${data}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(horarios => {
+                    const horarioSelect = document.getElementById('horarioAgendamento');
+                    horarioSelect.innerHTML = '<option value="">Selecione um horário</option>';
+                    horarios.forEach(horario => {
+                        const option = document.createElement('option');
+                        option.value = horario;
+                        option.textContent = horario;
+                        horarioSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar horários disponíveis:', error));
+            }
+        });
+
+        document.getElementById('saveAgendamento').addEventListener('click', function() {
+            const agendamentoData = {
+                paciente_id: document.getElementById('pacienteId').value,
+                medico_id: document.getElementById('medicoId').value,
+                data: `${document.getElementById('dataAgendamento').value} ${document.getElementById('horarioAgendamento').value}:00`
+            };
+
+            fetch("/agendamentos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(agendamentoData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Agendamento salvo com sucesso:', result);
+                $('#novoAgendamentoModal').modal('hide');
+                document.getElementById('novoAgendamentoForm').reset();
+                $('#successModal').modal('show');
+            })
+            .catch(error => {
+                console.error('Erro ao salvar agendamento:', error);
+                $('#errorModal').modal('show');
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("/agendamentos", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(result => {
+                const agendamentos = result;
+                const tbody = document.querySelector('tbody');
+
+                agendamentos.forEach(agendamento => {
+                    const tr = document.createElement('tr');
+                    const colors = ['#f8f9fa', '#e9ecef'];
+                    const color = colors[agendamentos.indexOf(agendamento) % colors.length];
+                    tr.style.backgroundColor = color;
+
+                    tr.innerHTML = `
+                        <td>${agendamento.id}</td>
+                        <td>${agendamento.paciente_nome}</td>
+                        <td>${agendamento.medico_nome}</td>
+                        <td>${agendamento.data_formatada}</td>
+                        <td>${agendamento.status}</td>
+                        <td>
+                            <button class="edit btn btn-primary" data-id="${agendamento.id}">Editar</button>
+                            <button class="delete btn btn-danger" data-id="${agendamento.id}">Deletar</button>
+                        </td>
+                    `;
+
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar agendamentos:', error));
+        });
+    </script>
+</body>
+</html>

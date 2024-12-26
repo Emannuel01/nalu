@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Consultas</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        .day {
+            border: 1px solid #ddd;
+            padding: 10px;
+            min-height: 100px;
+            background: #f4f4ff;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .day-header {
+            font-weight: bold;
+            text-align: center;
+        }
+        .consulta {
+            background-color: #f8f9fa;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Calendário de Consultas - <span id="month-year"></span></h2>
+        <div class="calendar" id="calendar">
+            <!-- Calendar days will be inserted here -->
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Create sidebar
+        const sidebarHtml = `
+                    <div id="sidebar" class="bg-primary text-white" 
+                    style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem;  background: #212931 !important;">
+                        <h4 class="text-center">Menu</h4>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/home">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/calendario">Calendario de Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                            </li>
+                        </ul>
+                    </div>
+                    `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendar = document.getElementById('calendar');
+            const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            const startDay = firstDayOfMonth.getDay();
+            const totalDays = lastDayOfMonth.getDate();
+            const monthYear = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            // Set month and year in the title
+            document.getElementById('month-year').textContent = monthYear;
+
+            // Add day headers
+            daysOfWeek.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.classList.add('day-header');
+                dayHeader.textContent = day;
+                calendar.appendChild(dayHeader);
+            });
+
+            // Add empty days for the first week
+            for (let i = 0; i < startDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.classList.add('day');
+                calendar.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            for (let i = 1; i <= totalDays; i++) {
+                const day = document.createElement('div');
+                day.classList.add('day');
+                day.dataset.date = new Date(today.getFullYear(), today.getMonth(), i).toISOString().split('T')[0];
+                day.innerHTML = `<strong>${i}</strong>`;
+                calendar.appendChild(day);
+            }
+
+            // Fetch and display consultas
+            fetch('/consultas', {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(result => {
+                const consultas = result;
+                consultas.forEach(consulta => {
+                    const consultaDate = new Date(consulta.data).toISOString().split('T')[0];
+                    const dayElement = document.querySelector(`.day[data-date="${consultaDate}"]`);
+                    if (dayElement) {
+                        const consultaElement = document.createElement('div');
+                        consultaElement.classList.add('consulta');
+                        consultaElement.innerHTML = `
+                            <div><strong>Paciente:</strong> ${consulta.paciente_nome}</div>
+                            <div><strong>Médico:</strong> ${consulta.medico_nome}</div>
+                            <div><strong>Hora:</strong> ${new Date(consulta.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+                        `;
+                        dayElement.appendChild(consultaElement);
+                    }
+                });
+            })
+            .catch(error => console.error('Erro ao buscar consultas:', error));
+        });
+    </script>
+</body>
+</html>

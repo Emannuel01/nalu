@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: clinica_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: clinica_medica
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+
+  app:
+    build:
+      context: ./app
+    container_name: clinica_app
+    restart: always
+    environment:
+      FLASK_RUN_HOST: 0.0.0.0
+      DATABASE_HOST: db
+      DATABASE_PORT: 3306
+      DATABASE_USER: user
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: clinica_medica
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
+volumes:
+  db_data:

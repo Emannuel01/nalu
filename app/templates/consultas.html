@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultas</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .btn {
+            padding: .075rem .35rem;
+        }
+        .container-top {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+        #create-consulta {
+            padding: 2rem;
+        }
+        #container{
+            margin-left: 300px !important;
+        }
+        .container-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container mt-5">
+        <div class="container-top">
+            <div class="mb-4">
+                <h2 class="mb-4">Consultas</h2> 
+                <input type="text" id="searchConsulta" class="form-control" placeholder="Pesquisar por paciente">
+            </div>
+            <div class="mb-4">
+                <button type="button" id="create-consulta" class="create-consulta btn btn-success" style="padding: 0.6rem;"
+                data-toggle="modal" data-target="#novaConsultaModal">
+                    Nova Consulta
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Consulta-->
+        <div class="modal fade" id="novaConsultaModal" tabindex="-1" role="dialog" aria-labelledby="novaConsultaModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="novaConsultaModalLabel">Nova Consulta</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="novaConsultaForm">
+                            <div class="form-group">
+                                <label for="pacienteId">Paciente</label>
+                                <select class="form-control" id="pacienteId" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="medicoId">Médico</label>
+                                <select class="form-control" id="medicoId" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="dataConsulta">Data</label>
+                                <input type="date" class="form-control" id="dataConsulta" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="horarioConsulta">Horário</label>
+                                <select class="form-control" id="horarioConsulta" required>
+                                    <option value="">Selecione um horário</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="diagnostico">Diagnostico</label>
+                                <textarea class="form-control" id="diagnostico" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="prescricao">Prescrição</label>
+                                <textarea class="form-control" id="prescricao" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="valor">Valor Consulta</label>
+                                <input type="text" class="form-control" id="valor" required pattern="^\d+(\.\d{1,2})?$" title="Por favor, insira um valor válido com até duas casas decimais.">
+                            </div>
+                            <div class="form-group">
+                                <label for="tipoPagamento">Tipo de Pagamento</label>
+                                <select class="form-control" id="tipoPagamento" required>
+                                    <option value="dinheiro">Dinheiro</option>
+                                    <option value="cartao">Cartão</option>
+                                    <option value="pix">Pix</option>
+                                </select>
+                            </div>                         
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" id="saveConsulta">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!--Grid consultas -->
+
+        <table class="table table-bordered shadow p-3 mb-5 bg-white rounded">
+            <thead class="thead-dark container-fixed">
+                <tr class="text-center text-white bg-primary font-weight-bold">
+                    <th>id</th>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Data Agendada</th>
+                    <th>Diagnostico</th>
+                    <th>Prescrição</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+              <!-- Modal Pagamento -->
+              <div class="modal fade" id="pagamentoModal" tabindex="-1" role="dialog" aria-labelledby="pagamentoModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="pagamentoModalLabel">Informações do Pagamento</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Valor:</strong> <span id="pagamentoValor"></span></p>
+                            <p><strong>Tipo de Pagamento:</strong> <span id="pagamentoTipo"></span></p>
+                            <p><strong>Status:</strong> <span id="pagamentoStatus"></span></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <script>
+                document.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('payment')) {
+                        const consultaId = event.target.getAttribute('data-id');
+                        fetch(`/consultas/${consultaId}/pagamento`, {
+                            method: "GET",
+                            redirect: "follow"
+                        })
+                        .then(response => response.json())
+                        .then(pagamento => {
+                            document.getElementById('pagamentoValor').textContent = pagamento.valor;
+                            document.getElementById('pagamentoTipo').textContent = pagamento.tipo_pagamento;
+                            document.getElementById('pagamentoStatus').textContent = pagamento.status;
+                        })
+                        .catch(error => console.error('Erro ao buscar informações do pagamento:', error));
+                    }
+                });
+            </script>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+
+    <script>
+
+        // Create sidebar
+        const sidebarHtml = `
+                    <div id="sidebar" class="bg-primary text-white" 
+                    style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem;  background: #212931 !important;">
+                        <h4 class="text-center">Menu</h4>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/home">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/calendario">Calendario de Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                            </li>
+                        </ul>
+                    </div>
+                    `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+
+        //search Consulta
+        document.getElementById('searchConsulta').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const paciente = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                if (paciente.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+                fetch("/consultas", {
+                    method: "GET",
+                    redirect: "follow"
+                })
+                .then(response => response.json())
+                .then(result => {
+                    const consultas = result;
+                    const tbody = document.querySelector('tbody');
+
+                    consultas.forEach(consulta => {
+                        const tr = document.createElement('tr');
+                        const colors = ['#f8f9fa', '#e9ecef'];
+                        const color = colors[consultas.indexOf(consulta) % colors.length];
+                        tr.style.backgroundColor = color;
+
+                        tr.innerHTML = `
+                            <style>
+                                .table-container {
+                                    max-height: 400px;
+                                    overflow-y: auto;
+                                }
+                            </style>
+                            <td>${consulta.id}</td>
+                            <td>${consulta.paciente_nome}</td>
+                            <td>${consulta.medico_nome}</td>
+                            <td>${new Date(consulta.data).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                            <td>${consulta.diagnostico}</td>
+                            <td>${consulta.prescricao}</td>
+                            <td>
+                                <button class="edit btn btn-primary" data-id="${consulta.id}">Editar</button>
+                                <button class="payment btn btn-info" data-id="${consulta.id}" data-toggle="modal" data-target="#pagamentoModal">Pagamento</button>
+                            </td>
+                        `;
+
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar consultas:', error));
+        });
+
+        // value numeric function
+        document.getElementById('valor').addEventListener('input', function(e) {
+            let value = e.target.value;
+            value = value.replace(/[^0-9.]/g, ''); // Remove non-numeric and non-dot characters
+            const decimalIndex = value.indexOf('.');
+            if (decimalIndex !== -1) {
+                value = value.slice(0, decimalIndex + 1) + value.slice(decimalIndex + 1).replace(/\./g, ''); // Ensure only one dot
+                value = value.slice(0, decimalIndex + 3); // Ensure only two decimal places
+            }
+            e.target.value = value;
+        });
+
+        // Fetch pacientes and médicos for the modal
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("/pacientes", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(pacientes => {
+                const pacienteSelect = document.getElementById('pacienteId');
+                pacientes.forEach(paciente => {
+                    const option = document.createElement('option');
+                    option.value = paciente.id;
+                    option.textContent = paciente.nome;
+                    pacienteSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar pacientes:', error));
+
+            fetch("/medicos", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(medicos => {
+                const medicoSelect = document.getElementById('medicoId');
+                medicos.forEach(medico => {
+                    const option = document.createElement('option');
+                    option.value = medico.id;
+                    option.textContent = medico.nome;
+                    medicoSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar médicos:', error));
+        });
+
+        document.getElementById('dataConsulta').addEventListener('change', function() {
+            const medicoId = document.getElementById('medicoId').value;
+            const data = this.value;
+
+            if (medicoId && data) {
+                fetch(`/agendamentos/disponiveis?medico_id=${medicoId}&data=${data}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => response.json())
+                .then(horarios => {
+                    const horarioSelect = document.getElementById('horarioConsulta');
+                    horarioSelect.innerHTML = '<option value="">Selecione um horário</option>';
+                    horarios.forEach(horario => {
+                        const option = document.createElement('option');
+                        option.value = horario;
+                        option.textContent = horario;
+                        horarioSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar horários disponíveis:', error));
+            }
+        });
+
+        document.getElementById('saveConsulta').addEventListener('click', function() {
+            const consultaData = {
+                paciente_id: document.getElementById('pacienteId').value,
+                medico_id: document.getElementById('medicoId').value,
+                data: `${document.getElementById('dataConsulta').value} ${document.getElementById('horarioConsulta').value}:00`,
+                diagnostico: document.getElementById('diagnostico').value,
+                prescricao: document.getElementById('prescricao').value,
+                valor: document.getElementById('valor').value,
+                tipo_pagamento: document.getElementById('tipoPagamento').value
+            };
+
+            fetch("/consultas", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(consultaData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Consulta salva com sucesso:', result);
+                $('#novaConsultaModal').modal('hide');
+                document.getElementById('novaConsultaForm').reset();
+                $('#successModal').modal('show');
+            })
+            .catch(error => {
+                console.error('Erro ao salvar consulta:', error);
+                $('#errorModal').modal('show');
+            });
+        });
+    </script>
+</body>
+</html>
+<!-- Modal Sucesso -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Sucesso</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Consulta cadastrada com sucesso!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Erro -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Erro</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Ocorreu um erro ao cadastrar a consulta. Por favor, tente novamente.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+        document.getElementById('saveConsulta').addEventListener('click', function() {
+        const consultaData = {
+            paciente_id: document.getElementById('pacienteId').value,
+            medico_id: document.getElementById('medicoId').value,
+            data: new Date(document.getElementById('dataConsulta').value).toISOString().slice(0, 19).replace('T', ' '),
+            diagnostico: document.getElementById('diagnostico').value,
+            prescricao: document.getElementById('prescricao').value,
+            valor: document.getElementById('valor').value,
+            tipo_pagamento: document.getElementById('tipoPagamento').value
+        };
+
+        fetch("/consultas", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(consultaData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Consulta salva com sucesso:', result);
+            $('#novaConsultaModal').modal('hide');
+            document.getElementById('novaConsultaForm').reset();
+            $('#successModal').modal('show');
+        })
+        .catch(error => {
+            console.error('Erro ao salvar consulta:', error);
+            $('#errorModal').modal('show');
+        });
+    });
+</script>

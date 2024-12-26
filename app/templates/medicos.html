@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Médicos</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .btn {
+    padding: .075rem .35rem;
+    }
+    .container-top {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        align-content: space-around;
+    }
+    #create-consulta {
+        padding: 2rem;
+    }
+    #container{
+        margin-left: 300px !important;
+    }
+    .container-fixed {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background-color: white;
+        margin-top: 10px;
+    }
+    </style>
+</head>
+<body>
+    <div id="container" class="container mt-5">
+        <div class="container-top">
+            <div class="mb-4">
+                <h2 class="mb-4">Médicos</h2> 
+                <input type="text" id="searchMedico" class="form-control" placeholder="Pesquisar por nome">
+            </div>
+            <div class="mb-4">
+                <button type="button" id="create-medico" class="create-medico btn btn-success" style="padding: 0.6rem;"
+                data-toggle="modal" data-target="#novoMedicoModal">
+                    Novo Médico
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Médico-->
+        <div class="modal fade" id="novoMedicoModal" tabindex="-1" role="dialog" aria-labelledby="novoMedicoModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="novoMedicoModalLabel">Novo Médico</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="novoMedicoForm">
+                            <div class="form-group">
+                                <label for="nome">Nome</label>
+                                <input type="text" class="form-control" id="nome" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="especialidade">Especialidade</label>
+                                <input type="text" class="form-control" id="especialidade" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="telefone">Telefone</label>
+                                <input type="text" class="tel-medico form-control" id="telefone" required placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" id="saveMedico">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Sucesso -->
+        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalLabel">Sucesso</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Médico salvo com sucesso!
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Erro -->
+        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="errorModalLabel">Erro</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Ocorreu um erro ao salvar o médico.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Grid médicos -->
+        <table class="table table-bordered shadow p-3 mb-5 bg-white rounded">
+            <thead class="thead-dark container-fixed">
+                <tr class="text-center text-white bg-primary font-weight-bold">
+                    <th>id</th>
+                    <th>Nome</th>
+                    <th>Especialidade</th>
+                    <th>Telefone</th>
+                    <th>Email</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Create sidebar
+        const sidebarHtml = `
+                    <div id="sidebar" class="bg-primary text-white" 
+                    style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem;  background: #212931 !important;">
+                        <h4 class="text-center">Menu</h4>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/home">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/calendario">Calendario de Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                            </li>
+                        </ul>
+                    </div>
+                    `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+
+        document.getElementById('saveMedico').addEventListener('click', function() {
+            // Simulate saving the medico
+            var success = true; // Change this to false to simulate an error
+
+            if (success) {
+                $('#novoMedicoModal').modal('hide');
+                $('#successModal').modal('show');
+            } else {
+                $('#novoMedicoModal').modal('hide');
+                $('#errorModal').modal('show');
+            }
+        });
+
+        $('#successModal, #errorModal').on('hidden.bs.modal', function () {
+            location.reload();
+        });
+
+          //search Medico name
+        document.getElementById('searchMedico').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const nome = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                if (nome.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+                    });
+            });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("/medicos", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(result => {
+                const medicos = result;
+                const tbody = document.querySelector('tbody');
+
+                medicos.forEach(medico => {
+                    const tr = document.createElement('tr');
+                    const colors = ['#f8f9fa', '#e9ecef'];
+                    const color = colors[medicos.indexOf(medico) % colors.length];
+                    tr.style.backgroundColor = color;
+
+                    tr.innerHTML = `
+                        <style>
+                            .table-container {
+                                max-height: 400px;
+                                overflow-y: auto;
+                            }
+                        </style>
+                        <td>${medico.id}</td>
+                        <td>${medico.nome}</td>
+                        <td>${medico.especialidade}</td>
+                        <td>${medico.telefone}</td>
+                        <td>${medico.email}</td>
+                        <td style="display: flex;
+                                    flex-direction: row;
+                                    align-items: stretch;
+                                    flex-wrap: nowrap;
+                                    align-content: flex-start;
+                                    justify-content: space-between;">
+                            <button id="medic-edit" class="consult btn-action btn btn-primary" data-name="${medico.nome}" data-id="${medico.id}">Editar</button>
+                            <button id="medic-delete" class="consult btn-action btn btn-danger" data-name="${medico.nome}" data-id="${medico.id}">Deletar</button>
+                        </td>
+                        
+                    `;
+
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar médicos:', error));
+        });
+
+        // Save medico
+        document.getElementById('saveMedico').addEventListener('click', function() {
+        const medicoData = {
+            nome: document.getElementById('nome').value,
+            especialidade: document.getElementById('especialidade').value,
+            telefone: document.getElementById('telefone').value,
+            email: document.getElementById('email').value
+        };
+
+        console.log('Médico:', medicoData);
+
+        fetch("/medicos", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(medicoData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Médico salvo:', result);
+            $('#novoMedicoModal').modal('hide');
+            document.getElementById('novoMedicoForm').reset();
+        })
+        .catch(error => console.error('Erro ao salvar médico:', error));
+        });
+
+
+
+
+        // Function to delete medico
+        document.addEventListener('click', function(event) {
+        if (event.target && event.target.id === 'medic-delete') {
+            const medicoId = event.target.getAttribute('data-id');
+            const medicoName = event.target.getAttribute('data-name');
+
+            // Show confirmation modal
+            const confirmModalHtml = `
+                <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Tem certeza que deseja excluir o médico ${medicoName}?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteButton" data-id="${medicoId}">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', confirmModalHtml);
+            $('#confirmDeleteModal').modal('show');
+        }
+        });
+
+        // Confirm delete action
+        document.addEventListener('click', function(event) {
+        if (event.target && event.target.id === 'confirmDeleteButton') {
+            const medicoId = event.target.getAttribute('data-id');
+
+            fetch(`/medicos/${medicoId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show success modal
+                    const successModalHtml = `
+                        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="successModalLabel">Sucesso</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Médico excluído com sucesso!
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', successModalHtml);
+                    $('#successModal').modal('show');
+                    $('#confirmDeleteModal').modal('hide');
+                    document.querySelector(`button[data-id="${medicoId}"]`).closest('tr').remove();
+                } else {
+                    throw new Error('Erro ao excluir médico');
+                }
+            })
+            .catch(error => {
+                // Show error modal
+                const errorModalHtml = `
+                    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="errorModalLabel">Erro</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Ocorreu um erro ao excluir o médico. Tente novamente mais tarde.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', errorModalHtml);
+                $('#errorModal').modal('show');
+                $('#confirmDeleteModal').modal('hide');
+            });
+        }
+        });
+
+
+
+        // Function to edit medico
+        document.addEventListener('click', function(event) {
+        if (event.target && event.target.id === 'medic-edit') {
+            const medicoId = event.target.getAttribute('data-id');
+
+            // Fetch medico data
+            fetch(`/medicos/${medicoId}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(medico => {
+                // Populate modal with medico data
+                document.getElementById('editNome').value = medico.nome;
+                document.getElementById('editEspecialidade').value = medico.especialidade;
+                document.getElementById('editTelefone').value = medico.telefone;
+                document.getElementById('editEmail').value = medico.email;
+
+                // Show modal
+                $('#editMedicoModal').modal('show');
+
+                // Update save button to handle edit
+                const saveButton = document.getElementById('updateMedico');
+                saveButton.addEventListener('click', function updateMedicoHandler() {
+                    const updatedMedicoData = {
+                        nome: document.getElementById('editNome').value,
+                        especialidade: document.getElementById('editEspecialidade').value,
+                        telefone: document.getElementById('editTelefone').value,
+                        email: document.getElementById('editEmail').value
+                    };
+
+                    fetch(`/medicos/${medicoId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedMedicoData)
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        console.log('Médico atualizado:', result);
+                        $('#editMedicoModal').modal('hide');
+                        document.getElementById('editMedicoForm').reset();
+                        location.reload(); // Reload page to reflect changes
+                    })
+                    .catch(error => console.error('Erro ao atualizar médico:', error));
+                }, { once: true });
+            })
+            .catch(error => console.error('Erro ao buscar médico:', error));
+        }
+        });
+
+        // Create edit medico modal
+        const editMedicoModalHtml = `
+        <div class="modal fade" id="editMedicoModal" tabindex="-1" role="dialog" aria-labelledby="editMedicoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editMedicoModalLabel">Editar Médico</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editMedicoForm">
+                        <div class="form-group">
+                            <label for="editNome">Nome</label>
+                            <input type="text" class="form-control" id="editNome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEspecialidade">Especialidade</label>
+                            <input type="text" class="form-control" id="editEspecialidade" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTelefone">Telefone</label>
+                            <input type="text" class="tel-medico form-control" id="editTelefone" required placeholder="(00) 00000-0000">
+                        </div>
+                        <div class="form-group">
+                            <label for="editEmail">Email</label>
+                            <input type="email" class="form-control" id="editEmail" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="updateMedico">Atualizar</button>
+                </div>
+            </div>
+        </div>
+        </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', editMedicoModalHtml);
+    </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container-top {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+        #container {
+            margin-left: 300px !important;
+        }
+        .container-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container mt-5">
+        <div class="container-top">
+            <div class="mb-4">
+                <h2 class="mb-4">Relatórios</h2> 
+                <input type="text" id="searchRelatorio" class="form-control" placeholder="Pesquisar relatório">
+            </div>
+            <div>
+                <a href="/app/home" class="btn btn-primary">Voltar ao Início</a>
+            </div>
+        </div>
+
+        <!-- Grid relatorios -->
+        <table class="table table-bordered shadow p-3 mb-5 bg-white rounded">
+            <thead class="thead-dark container-fixed">
+                <tr class="text-center text-white bg-primary font-weight-bold">
+                    <th>Relatório</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pacientes por Gênero</td>
+                    <td><a href="/relatorios/pacientes_por_genero" class="btn btn-info">Visualizar</a></td>
+                </tr>
+                <tr>
+                    <td>Consultas por Médico</td>
+                    <td><a href="/relatorios/consultas_por_medico" class="btn btn-info">Visualizar</a></td>
+                </tr>
+                <tr>
+                    <td>Pagamentos por Status</td>
+                    <td><a href="/relatorios/pagamentos_por_status" class="btn btn-info">Visualizar</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Create sidebar
+        const sidebarHtml = `
+            <div id="sidebar" class="bg-primary text-white" 
+            style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem;  background: #212931 !important;">
+                <h4 class="text-center">Menu</h4>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/calendario">Calendario de Consultas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                    </li>
+                </ul>
+            </div>
+        `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+        
+        document.getElementById('searchRelatorio').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const relatorio = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                if (relatorio.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+<!-- Modal -->
+<div class="modal fade" id="relatorioModal" tabindex="-1" aria-labelledby="relatorioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="relatorioModalLabel">Relatório</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr id="modalTableHeader"></tr>
+                    </thead>
+                    <tbody id="modalTableBody"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-success" id="downloadXls">Baixar XLS</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.btn-info').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            const url = this.getAttribute('href');
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const tableHeader = document.getElementById('modalTableHeader');
+                    const tableBody = document.getElementById('modalTableBody');
+                    tableHeader.innerHTML = '';
+                    tableBody.innerHTML = '';
+
+                    if (data.length > 0) {
+                        const headers = Object.keys(data[0]);
+                        headers.forEach(header => {
+                            const th = document.createElement('th');
+                            th.textContent = header;
+                            tableHeader.appendChild(th);
+                        });
+
+                        data.forEach(row => {
+                            const tr = document.createElement('tr');
+                            headers.forEach(header => {
+                                const td = document.createElement('td');
+                                td.textContent = row[header];
+                                tr.appendChild(td);
+                            });
+                            tableBody.appendChild(tr);
+                        });
+                    }
+
+                    $('#relatorioModal').modal('show');
+                });
+        });
+    });
+
+    document.getElementById('downloadXls').addEventListener('click', function() {
+        const table = document.querySelector('#relatorioModal table');
+        const rows = Array.from(table.rows);
+        let csvContent = "data:text/csv;charset=utf-8,";
+
+        rows.forEach(row => {
+            const cols = Array.from(row.cells);
+            const rowContent = cols.map(col => col.textContent).join(",");
+            csvContent += rowContent + "\r\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'relatorio.xls');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+</script>

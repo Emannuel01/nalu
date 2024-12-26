@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prontuário</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container-top {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+        #create-prontuario {
+            padding: 2rem;
+        }
+        #container {
+            margin-left: 300px !important;
+        }
+        .container-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container mt-5">
+        <div class="container-top">
+            <div class="mb-4">
+                <h2 class="mb-4">Prontuário</h2> 
+                <input type="text" id="searchProntuario" class="form-control" placeholder="Pesquisar por paciente">
+            </div>
+            <div class="mb-4">
+                <button type="button" id="create-prontuario" class="create-prontuario btn btn-success" style="padding: 0.6rem;"
+                data-toggle="modal" data-target="#novoProntuarioModal">
+                    Novo Prontuário
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Prontuário -->
+        <div class="modal fade" id="novoProntuarioModal" tabindex="-1" role="dialog" aria-labelledby="novoProntuarioModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="novoProntuarioModalLabel">Novo Prontuário</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="novoProntuarioForm">
+                            <div class="form-group">
+                                <label for="pacienteId">Paciente</label>
+                                <select class="form-control" id="pacienteId" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="medicoId">Médico</label>
+                                <select class="form-control" id="medicoId" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="dataProntuario">Data</label>
+                                <input type="datetime-local" class="form-control" id="dataProntuario" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="descricao">Descrição</label>
+                                <textarea class="form-control" id="descricao" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="exames">Exames</label>
+                                <textarea class="form-control" id="exames" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="diagnosticos">Diagnósticos</label>
+                                <textarea class="form-control" id="diagnosticos" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="tratamentos">Tratamentos</label>
+                                <textarea class="form-control" id="tratamentos" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="evolucaoClinica">Evolução Clínica</label>
+                                <textarea class="form-control" id="evolucaoClinica" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="observacoes">Observações</label>
+                                <textarea class="form-control" id="observacoes" rows="3"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" id="saveProntuario">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid prontuários -->
+        <table class="table table-bordered shadow p-3 mb-5 bg-white rounded">
+            <thead class="thead-dark container-fixed">
+                <tr class="text-center text-white bg-primary font-weight-bold">
+                    <th>id</th>
+                    <th>Paciente</th>
+                    <th>Descricao</th>
+                    <th>Exames</th>
+                    <th>Diagnosticos</th>
+                    <th>Tratamentos</th>
+                    <th>Evolução Clínica</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <!-- Modal Editar Prontuário -->
+        <div class="modal fade" id="editProntuarioModal" tabindex="-1" role="dialog" aria-labelledby="editProntuarioModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProntuarioModalLabel">Editar Prontuário</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editProntuarioForm">
+                            <input type="hidden" id="editProntuarioId">
+                            <div class="form-group">
+                                <label for="editPacienteId">Paciente</label>
+                                <input type="text" readonly class="form-control" id="editPacienteId" required>
+                            <div class="form-group">
+                                <label for="editDataProntuario">Data</label>
+                                <input type="datetime-local" class="form-control" id="editDataProntuario" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="editDescricao">Descrição</label>
+                                <textarea class="form-control" id="editDescricao" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editExames">Exames</label>
+                                <textarea class="form-control" id="editExames" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editDiagnosticos">Diagnósticos</label>
+                                <textarea class="form-control" id="editDiagnosticos" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editTratamentos">Tratamentos</label>
+                                <textarea class="form-control" id="editTratamentos" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editEvolucaoClinica">Evolução Clínica</label>
+                                <textarea class="form-control" id="editEvolucaoClinica" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="editObservacoes">Observações</label>
+                                <textarea class="form-control" id="editObservacoes" rows="3"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" id="saveEditProntuario">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Create sidebar
+        const sidebarHtml = `
+                    <div id="sidebar" class="bg-primary text-white" 
+                    style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem;  background: #212931 !important;">
+                        <h4 class="text-center">Menu</h4>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/home">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/calendario">Calendario de Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                            </li>
+                        </ul>
+                    </div>
+                    `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+
+
+        // Search Prontuário
+        document.getElementById('searchProntuario').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const paciente = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                if (paciente.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("/prontuarios", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(result => {
+                const prontuarios = result;
+                const tbody = document.querySelector('tbody');
+
+                prontuarios.forEach(prontuario => {
+                    const tr = document.createElement('tr');
+                    const colors = ['#f8f9fa', '#e9ecef'];
+                    const color = colors[prontuarios.indexOf(prontuario) % colors.length];
+                    tr.style.backgroundColor = color;
+
+                    tr.innerHTML = `
+                        <td>${prontuario.id}</td>
+                        <td>${prontuario.paciente_nome}</td>
+                        <td>${prontuario.descricao}</td>
+                        <td>${prontuario.exames}</td>
+                        <td>${prontuario.diagnosticos}</td>
+                        <td>${prontuario.tratamentos}</td>
+                        <td>${prontuario.evolucao_clinica}</td>
+                        <td>
+                            <button   class="edit btn btn-primary" 
+                                data-id="${prontuario.id}"
+                                data-paciente="${prontuario.paciente_nome}"
+                                data-paciente-id="${prontuario.paciente_id}"
+                                data-medico="${prontuario.medico_nome}"
+                                data-data="${prontuario.data}"
+                                data-descricao="${prontuario.descricao}"
+                                data-exames="${prontuario.exames}"
+                                data-diagnosticos="${prontuario.diagnosticos}"
+                                data-tratamentos="${prontuario.tratamentos}"
+                                data-evolucao-clinica="${prontuario.evolucao_clinica}"
+                            ">Editar</button>
+                            </td>
+                    `;
+
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar prontuários:', error));
+        });
+
+        document.getElementById('saveProntuario').addEventListener('click', function() {
+            const prontuarioData = {
+                paciente_id: document.getElementById('pacienteId').value,
+                medico_id: document.getElementById('medicoId').value,
+                data: document.getElementById('dataProntuario').value,
+                observacoes: document.getElementById('observacoes').value,
+                descricao: document.getElementById('descricao').value,
+                exames: document.getElementById('exames').value,
+                diagnosticos: document.getElementById('diagnosticos').value,
+                tratamentos: document.getElementById('tratamentos').value,
+                evolucao_clinica: document.getElementById('evolucaoClinica').value
+            };
+
+            console.log('Prontuário a ser salvo:', prontuarioData);
+
+            fetch("/prontuarios", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(prontuarioData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Prontuário salvo:', result);
+                $('#novoProntuarioModal').modal('hide');
+                document.getElementById('novoProntuarioForm').reset();
+            })
+            .catch(error => console.error('Erro ao salvar prontuário:', error));
+        });
+
+        // Fetch pacientes and médicos for the modal
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("/pacientes", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(pacientes => {
+                const pacienteSelect = document.getElementById('pacienteId');
+                pacientes.forEach(paciente => {
+                    const option = document.createElement('option');
+                    option.value = paciente.id;
+                    option.textContent = paciente.nome;
+                    pacienteSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar pacientes:', error));
+
+            fetch("/medicos", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(medicos => {
+                const medicoSelect = document.getElementById('medicoId');
+                medicos.forEach(medico => {
+                    const option = document.createElement('option');
+                    option.value = medico.id;
+                    option.textContent = medico.nome;
+                    medicoSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar médicos:', error));
+        });
+
+
+
+        // Edit Prontuário
+
+        document.addEventListener('click', function(event) {
+            if (event.target && event.target.classList.contains('edit')) {
+                const button = event.target;
+                const prontuarioData = {
+                    id: button.getAttribute('data-id'),
+                    paciente: button.getAttribute('data-paciente'),
+                    medico: button.getAttribute('data-medico'),
+                    data: button.getAttribute('data-data'),
+                    descricao: button.getAttribute('data-descricao'),
+                    exames: button.getAttribute('data-exames'),
+                    diagnosticos: button.getAttribute('data-diagnosticos'),
+                    tratamentos: button.getAttribute('data-tratamentos'),
+                    evolucaoClinica: button.getAttribute('data-evolucao-clinica'),
+                    paciente_id: button.getAttribute('data-paciente-id')
+                };
+
+                console.log('Prontuário a ser editado:', prontuarioData);
+
+                document.getElementById('editProntuarioId').value = prontuarioData.id;
+                document.getElementById('editPacienteId').value = prontuarioData.paciente_id;
+                document.getElementById('editDataProntuario').value = prontuarioData.data;
+                document.getElementById('editDescricao').value = prontuarioData.descricao;
+                document.getElementById('editExames').value = prontuarioData.exames;
+                document.getElementById('editDiagnosticos').value = prontuarioData.diagnosticos;
+                document.getElementById('editTratamentos').value = prontuarioData.tratamentos;
+                document.getElementById('editEvolucaoClinica').value = prontuarioData.evolucaoClinica;
+                document.getElementById('editObservacoes').value = prontuarioData.observacoes;
+
+                $('#editProntuarioModal').modal('show');
+
+                document.getElementById('saveEditProntuario').addEventListener('click', function() {
+                    const updatedProntuarioData = {
+                        id: document.getElementById('editProntuarioId').value,
+                        paciente_id: document.getElementById('editPacienteId').value,
+                        data: document.getElementById('editDataProntuario').value,
+                        descricao: document.getElementById('editDescricao').value,
+                        exames: document.getElementById('editExames').value,
+                        diagnosticos: document.getElementById('editDiagnosticos').value,
+                        tratamentos: document.getElementById('editTratamentos').value,
+                        evolucao_clinica: document.getElementById('editEvolucaoClinica').value,
+                        observacoes: document.getElementById('editObservacoes').value
+                    };
+
+                    fetch(`/prontuarios/${updatedProntuarioData.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(updatedProntuarioData)
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                            // Success Modal
+                    const successModalHtml = `
+                        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="successModalLabel">Sucesso</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Prontuário atualizado com sucesso!
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="location.reload()">Fechar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', successModalHtml);
+                        $('#editProntuarioModal').modal('hide');
+                        document.getElementById('editProntuarioForm').reset();
+                        // Show success message
+                        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                        successModal.show();
+                })
+                .catch(error => {
+                    console.error('Erro ao atualizar prontuário:', error);
+                    // Error Modal
+                    const errorModalHtml = `
+                        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="errorModalLabel">Erro</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Ocorreu um erro ao atualizar o prontuário. Por favor, tente novamente.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', errorModalHtml);
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                });
+            });
+        }
+    });
+
+    </script>
+
+
+</body>
+</html>

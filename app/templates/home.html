@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Início</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container-top {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+        #container {
+            margin-left: 300px !important;
+        }
+        .container-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: white;
+            margin-top: 10px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container mt-5">
+        <div class="container-top">
+            <div class="mb-4">
+                <h2 class="mb-4">Dashboard</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <canvas id="consultasChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <canvas id="pacientesChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="chart-container">
+                    <canvas id="pagamentosChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Create sidebar
+        const sidebarHtml = `
+                    <div id="sidebar" class="bg-primary text-white" 
+                    style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem;  background: #212931 !important;">
+                        <h4 class="text-center">Menu</h4>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/home">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/calendario">Calendario de Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                            </li>
+                        </ul>
+                    </div>
+                    `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+
+        // Dados de exemplo para gráficos
+        const consultasData = {
+            labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'],
+            datasets: [{
+                label: 'Consultas',
+                data: [12, 19, 3, 5, 2, 3],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        const pacientesData = {
+            labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'],
+            datasets: [{
+                label: 'Pacientes',
+                data: [2, 3, 20, 5, 1, 4],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        // Criar gráficos
+        const consultasCtx = document.getElementById('consultasChart').getContext('2d');
+        const consultasChart = new Chart(consultasCtx, {
+            type: 'bar',
+            data: consultasData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        const pacientesCtx = document.getElementById('pacientesChart').getContext('2d');
+        const pacientesChart = new Chart(pacientesCtx, {
+            type: 'line',
+            data: pacientesData,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Dados de exemplo para gráfico de pagamentos
+        const pagamentosData = {
+            labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'],
+            datasets: [{
+                label: 'Pagamentos',
+                data: [5, 10, 15, 20, 25, 30],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        // Criar gráfico de pagamentos
+        pagamentosData.datasets[0].backgroundColor = [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+        ];
+        pagamentosData.datasets[0].borderColor = [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+        ];
+        const pagamentosCtx = document.getElementById('pagamentosChart').getContext('2d');
+        const pagamentosChart = new Chart(pagamentosCtx, {
+            type: 'pie',
+            data: pagamentosData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        document.querySelector('#consultasChart').parentElement.insertAdjacentHTML('beforebegin', '<h4>Consultas</h4>');
+        document.querySelector('#pacientesChart').parentElement.insertAdjacentHTML('beforebegin', '<h4>Pacientes</h4>');
+        document.querySelector('#pagamentosChart').parentElement.insertAdjacentHTML('beforebegin', '<h4>Pagamentos</h4>');
+
+    </script>
+</body>
+</html>

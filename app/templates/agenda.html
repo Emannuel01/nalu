@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Consultas</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container-top {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+        #create-consulta {
+            padding: 2rem;
+        }
+        #container {
+            margin-left: 300px !important;
+        }
+        .container-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container mt-5">
+        <div class="container-top">
+            <div class="mb-4">
+                <h2 class="mb-4">Agenda de Consultas</h2> 
+                <input type="text" id="searchMedico" class="form-control" placeholder="Pesquisar por médico">
+            </div>
+            <div>
+                <a href="/app/calendario" class="btn btn-primary">Calendário Consultas</a>
+            </div>
+        </div>
+
+        <!-- Grid consultas -->
+        <table class="table table-bordered shadow p-3 mb-5 bg-white rounded">
+            <thead class="thead-dark container-fixed">
+                <tr class="text-center text-white bg-primary font-weight-bold">
+                    <th>id</th>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Data</th>
+                    <th>Hora</th>
+                    <th>Prescriação</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+
+                 // Create sidebar
+                 const sidebarHtml = `
+                    <div id="sidebar" class="bg-primary text-white" 
+                    style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem;  background: #212931 !important;">
+                        <h4 class="text-center">Menu</h4>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/home">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/calendario">Calendario de Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                            </li>
+                            </li class="nav-item">
+                                <a class="nav-link text-white" href="/app/horarios-agendamentos">Horários para Agendamentos</a>
+                            </li>
+                        </ul>
+                    </div>
+                    `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+        
+        document.getElementById('searchMedico').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const medico = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                if (medico.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            fetch(`/consultas?data=${today}`, {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(result => {
+                const consultas = result;
+                const tbody = document.querySelector('tbody');
+
+                consultas.forEach(consulta => {
+                    const tr = document.createElement('tr');
+                    const colors = ['#f8f9fa', '#e9ecef'];
+                    const color = colors[consultas.indexOf(consulta) % colors.length];
+                    tr.style.backgroundColor = color;
+
+                    tr.innerHTML = `
+                        <td>${consulta.id}</td>
+                        <td>${consulta.paciente_nome}</td>
+                        <td>${consulta.medico_nome}</td>
+                        <td>${new Date(consulta.data).toLocaleDateString('pt-BR')}</td>
+                        <td>${new Date(consulta.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td>${consulta.prescricao}</td>
+                    `;
+
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar consultas:', error));
+        });
+    </script>
+</body>
+</html>

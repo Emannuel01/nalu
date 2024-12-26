@@ -1,0 +1,40 @@
+
+Cenário: Sistema de Gestão de Clínica Médica
+Objetivo: Criar um sistema para gerenciar as operações de uma clínica médica, permitindo o controle de pacientes, médicos, consultas, prontuários, agendamentos,
+pagamentos e relatórios administrativos.
+
+Funcionalidades principais:
+1. Cadastro de Pacientes: Cadastro de pacientes com informações pessoais, histórico médico, e dados de contato.
+2. Cadastro de Médicos: Registro de médicos com especialidade, horários de atendimento e informações profissionais.
+3?. Agendamento de Consultas: Permite aos pacientes agendarem consultas com médicos, com base na disponibilidade do profissional.
+4. Gestão de Consultas: Registro de consultas realizadas, incluindo o médico responsável, paciente, diagnóstico, prescrição e cobrança.
+5. Prontuário Médico: Controle completo do histórico médico do paciente, incluindo exames, diagnósticos, tratamentos, e evolução do quadro clínico.
+6. Pagamentos: Registro e controle de pagamentos relacionados a consultas ou tratamentos realizados pelos pacientes.
+7. Relatórios: Geração de relatórios sobre consultas realizadas, pendências de pagamentos, desempenho dos médicos e outros aspectos administrativos.
+
+
+Regras:
+1. Paciente Prontuário: Um paciente pode ter vários prontuários médicos.
+2. Paciente -Consulta: Cada paciente pode ter várias consultas.
+3. Médico Consulta: Um médico pode realizar várias consultas, mas cada consulta está associada a um único médico.
+4. Consulta-> Pagamento: Cada consulta tem um pagamento associado.
+5. Médico Horário Atendimento: Cada médico tem horários de atendimento específicos.
+6. Relatório Consulta: Relatórios podem ser gerados a partir dos dados das consultas realizadas, permitindo análise de desempenho e atividades administrativas.
+
+
+
+
+horario atendimento inicial 9:00
+
+horario atendimento final 15:00
+
+definido: cada medico tem uma consulta a cada 1hr
+
+consultas: filtro dia, daquele medico
+
+9 - x
+10 - x
+11 - v   ---
+12 - x
+13 - x
+14 - v  ---

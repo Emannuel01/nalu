@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacientes</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .btn {
+        padding: .075rem .35rem;
+        }
+        .container-top {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: space-around;
+        }
+        #create-paciente {
+            padding: 2rem;
+        }
+        #container{
+            margin-left: 300px !important;
+        }
+        .container-fixed {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" class="container mt-5">
+        <div class="container-top">
+            <div class="mb-4">
+                <h2 class="mb-4">Pacientes</h2> 
+                <input type="text" id="searchPaciente" class="form-control" placeholder="Pesquisar por nome">
+            </div>
+            <div class="mb-4">
+                <button type="button" id="create-pacient" class="create-pacient btn btn-success" style="padding: 0.6rem;"
+                data-toggle="modal" data-target="#novoPacienteModal">
+                    Novo Paciente
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Paciente-->
+        <div class="modal fade" id="novoPacienteModal" tabindex="-1" role="dialog" aria-labelledby="novoPacienteModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="novoPacienteModalLabel">Novo Paciente</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="novoPacienteForm">
+                            <div class="form-group">
+                                <label for="nome">Nome</label>
+                                <input type="text" class="form-control" id="nome" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="idade">Idade</label>
+                                <input type="text" class="form-control" id="idade" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="genero">Gênero</label>
+                                <select class="form-control" id="genero" required>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Feminino">Feminino</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="endereco">Endereço</label>
+                                <input type="text" class="form-control" id="endereco" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="telefone">Telefone</label>
+                                <input type="text" class="tel-paciente form-control" id="telefone" required placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cpf">CPF</label>
+                                <input type="text" class="form-control" id="cpf" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="historico">Histórico</label>
+                                <textarea class="form-control" id="historico" rows="3"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" class="btn btn-primary" id="savePaciente">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!--Grid pacientes -->
+
+        <table class="table table-bordered shadow p-3 mb-5 bg-white rounded">
+            <thead class="thead-dark container-fixed">
+                <tr class="text-center text-white bg-primary font-weight-bold"></tr>
+                    <th>id</th>
+                    <th>Nome</th>
+                    <th>Idade</th>
+                    <th>Gênero</th>
+                    <th>Endereço</th>
+                    <th>Telefone</th>
+                    <th>Email</th>
+                    <th>CPF</th>
+                    <th>Historico</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Create sidebar
+        const sidebarHtml = `
+                    <div id="sidebar" class="bg-primary text-white" 
+                    style="position: fixed; top: 0; left: 0; height: 100%; width: 200px; padding: 1rem;  background: #212931 !important;">
+                        <h4 class="text-center">Menu</h4>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/home">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/medicos">Médicos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/pacientes">Pacientes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/consultas">Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/prontuario">Prontuários</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/agenda">Agenda</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/calendario">Calendario de Consultas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" href="/app/relatorios">Relatórios</a>
+                            </li>
+                        </ul>
+                    </div>
+                    `;
+
+        // Insert sidebar into body
+        document.body.insertAdjacentHTML('afterbegin', sidebarHtml);
+
+        // Adjust main container to account for sidebar
+        document.querySelector('.container').style.marginLeft = '220px';
+
+        //search Paciente name
+        document.getElementById('searchPaciente').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const nome = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                if (nome.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch("/pacientes", {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(response => response.json())
+            .then(result => {
+                const pacientes = result;
+                const tbody = document.querySelector('tbody');
+
+                pacientes.forEach(paciente => {
+                    const tr = document.createElement('tr');
+                    const colors = ['#f8f9fa', '#e9ecef'];
+                    const color = colors[pacientes.indexOf(paciente) % colors.length];
+                    tr.style.backgroundColor = color;
+
+                    tr.innerHTML = `
+                        <style>
+                            .table-container {
+                                max-height: 400px;
+                                overflow-y: auto;
+                            }
+                        </style>
+                        <td>${paciente.id}</td>
+                        <td>${paciente.nome}</td>
+                        <td>${paciente.idade}</td>
+                        <td>${paciente.genero}</td>
+                        <td>${paciente.endereco}</td>
+                        <td>${paciente.telefone}</td>
+                        <td>${paciente.email}</td>
+                        <td>${paciente.cpf}</td>
+                        <td>${paciente.historico}</td>
+                        <td><button class="consult btn btn-primary" data-name="${paciente.nome}" data-id="${paciente.id}">Nova Consulta</button></td>
+                    `;
+
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar pacientes:', error));
+        });
+
+        // Function to open modal pacient
+        function openModal(pacienteId, pacienteNome) {
+        const modalHtml = `
+        <div class="modal fade" id="consultaModal" tabindex="-1" role="dialog" aria-labelledby="consultaModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="consultaModalLabel">Nova Consulta</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                <form id="consultaForm">
+                    <div class="form-group">
+                    <label for="pacienteNome">Nome do Paciente</label>
+                    <input type="text" class="form-control" id="pacienteNome" value="${pacienteNome}" readonly>
+                    </div>
+                    <div class="form-group">
+                    <label for="medicoId">Médico</label>
+                    <select class="form-control" id="medicoId" required></select>
+                    </div>
+                    <div class="form-group">
+                    <label for="dataConsulta">Data</label>
+                    <input type="datetime-local" class="form-control" id="dataConsulta" required>
+                    </div>
+                    <div class="form-group">
+                    <label for="descricao">Descrição</label>
+                    <textarea class="form-control" id="descricao" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                    <label for="diagnostico">Diagnóstico</label>
+                    <textarea class="form-control" id="diagnostico" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                    <label for="prescricao">Prescrição</label>
+                    <textarea class="form-control" id="prescricao" rows="3"></textarea>
+                    </div>
+                    <input type="hidden" id="pacienteId" value="${pacienteId}">
+                </form>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="saveConsulta">Salvar</button>
+                </div>
+            </div>
+            </div>
+        </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        $('#consultaModal').modal('show');
+
+        // Fetch médicos and populate the select
+        fetch("/medicos", {
+        method: "GET",
+        redirect: "follow"
+        })
+        .then(response => response.json())
+        .then(medicos => {
+        const medicoSelect = document.getElementById('medicoId');
+        medicos.forEach(medico => {
+            const option = document.createElement('option');
+            option.value = medico.id;
+            option.textContent = medico.nome;
+            medicoSelect.appendChild(option);
+        });
+        })
+        .catch(error => console.error('Erro ao buscar médicos:', error));
+
+        // Save consult
+        document.getElementById('saveConsulta').addEventListener('click', function() {
+        const consultaData = {
+            paciente_id: document.getElementById('pacienteId').value,
+            medico_id: document.getElementById('medicoId').value,
+            data: document.getElementById('dataConsulta').value,
+            diagnostico: document.getElementById('diagnostico').value,
+            prescricao: document.getElementById('prescricao').value
+        };
+
+        fetch("/consultas", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json"
+            },
+            body: JSON.stringify(consultaData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Consulta salva:', result);
+            $('#consultaModal').modal('hide');
+            document.getElementById('consultaForm').reset();
+        })
+        .catch(error => console.error('Erro ao salvar consulta:', error));
+        });
+
+        // Remove modal from DOM after it is hidden
+        $('#consultaModal').on('hidden.bs.modal', function () {
+        document.getElementById('consultaModal').remove();
+        });
+        }
+
+        // Event listener for consult buttons
+        document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('consult')) {
+        const pacienteId = event.target.getAttribute('data-id');
+        const pacienteNome = event.target.getAttribute('data-name');
+        openModal(pacienteId, pacienteNome);
+        }
+        });
+
+        // Save paciente
+        document.getElementById('savePaciente').addEventListener('click', function() {
+            const pacienteData = {
+                nome: document.getElementById('nome').value,
+                idade: document.getElementById('idade').value,
+                genero: document.getElementById('genero').value,
+                endereco: document.getElementById('endereco').value,
+                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value,
+                historico: document.getElementById('historico').value,
+                cpf: document.getElementById('cpf').value
+            };
+
+            console.log('Paciente:', pacienteData);
+
+            fetch("/pacientes", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(pacienteData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Paciente salvo:', result);
+                $('#novoPacienteModal').modal('hide');
+                document.getElementById('novoPacienteForm').reset();
+            })
+            .catch(error => console.error('Erro ao salvar paciente:', error));
+        });
+    </script>
+
+</body>
+</html>
