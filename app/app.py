@@ -6,7 +6,6 @@ from routes.consultas import consultas_bp
 from routes.prontuario import prontuario_bp
 from routes.statics import statics_bp
 from routes.relatorios import relatorios_bp
-from routes.agendamento import agendamento_bp
 
 app = Flask(__name__)
 
